@@ -69,7 +69,6 @@ public class QLearning {
   public int getNextActionFromMaxQ(int state)
   {
 	  int nextAction = 0;
-	  //double maxQ = -100000000.0;
 	  double maxQ = qTable[state][0];
 	  actionList.clear(); // 配列リストの中身を全部削除
 	  actionList.add(0);
@@ -102,7 +101,6 @@ public class QLearning {
    */
   public double getMaxQ(int state)
   {
-	  //double maxQ = -100000000.0;
 	  double maxQ = qTable[state][0];
 	  
 	  // maxQ で一番大きい Ｑ値を保存し、最後にそれを返す
