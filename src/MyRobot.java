@@ -3,6 +3,7 @@
  */
 public class MyRobot extends Robot
 {
+	public int reward = 0; // 頑張って取得する
 	/**
 	 * 実行用関数
 	 */
@@ -13,7 +14,7 @@ public class MyRobot extends Robot
 		// step 1:	Q学習する
 		// QLearningのインスタンスを作る	
 		int states = 8; // 状態数
-		int actions = 35;	// 行動数
+		int actions = 3;	// 行動数
 		double alpha = 0.5; // 学習率
 		double gamma = 0.5; // 割引率
 
@@ -41,9 +42,12 @@ public class MyRobot extends Robot
 				double epsilon = 0.5;
 				int action = ql.selectAction(state, epsilon);
 				//int action = ql.selectAction(state);
-
+				
+//				System.out.println("Debugggggg 1");
+				
 				/*--------------- 選択した行動を実行 (ロボットを移動する) ---------------*/
 				moveRobotCar(action);
+//				System.out.println("Debugggggg 2");
 
 				/*--------------- 新しい状態を観測＆報酬を得る ---------------*/
 				//次の状態番号
@@ -51,7 +55,7 @@ public class MyRobot extends Robot
 				//System.out.println(after);
 				
 				// 状態afterにおける報酬
-				int reward = 0; // 頑張って取得する
+				//int reward = 0; // 頑張って取得する
 
 				// Goal に到達したら 100 報酬を与え、普通の通路なら -10
 				if(isOnGoal())
@@ -60,10 +64,10 @@ public class MyRobot extends Robot
 //					reward = 50;
 //				else if(after == 0)
 //					reward = -50;
-				else if(getColor(LIGHT_B) == BLACK)
+				else if(reward != -100 && getColor(LIGHT_B) == BLACK)
 					reward = 50;
-				else if(getColor(LIGHT_B) == WHITE)
-					reward = -100;
+//				else if(getColor(LIGHT_B) == WHITE)
+//					reward = -100;
 
 				/*--------------- Q 値を更新 ---------------*/
 				// qlインスタンスから呼び出す
@@ -124,78 +128,110 @@ public class MyRobot extends Robot
 	 */
 	public void moveRobotCar(int action)
 	{
+		int rotatedAngle = 1;
+		
 		// 0:LEFT 1:RIGHT
 		// 壁がないことを確認して移動する
-		if(action == 0) // STRAIGHT
+		if(action == 0){ // STRAIGHT
 			goStraight(1);
-		else if(action == 1) // LEFT
-			turnLeft(5);
-		else if(action == 2) // RIGHT
-			turnRight(5);
-		else if(action == 3) // LEFT
-			turnLeft(15);
-		else if(action == 4) // RIGHT
-			turnRight(15);
-		else if(action == 5) // LEFT
-			turnLeft(25);
-		else if(action == 6) // RIGHT
-			turnRight(25);
-		else if(action == 7) // LEFT
-			turnLeft(35);
-		else if(action == 8) // RIGHT
-			turnRight(35);
-		else if(action == 9) // LEFT
-			turnLeft(45);
-		else if(action == 10) // RIGHT
-			turnRight(45);
-		else if(action == 11) // LEFT
-			turnLeft(55);
-		else if(action == 12) // RIGHT
-			turnRight(55);
-		else if(action == 13) // LEFT
-			turnLeft(65);
-		else if(action == 14) // RIGHT
-			turnRight(65);
-		else if(action == 15) // LEFT
-			turnLeft(75);
-		else if(action == 16) // RIGHT
-			turnRight(75);
-		else if(action == 17) // LEFT
-			turnLeft(85);
-		else if(action == 18) // RIGHT
-			turnRight(85);
-		else if(action == 19) // LEFT
-			turnLeft(95);
-		else if(action == 20) // RIGHT
-			turnRight(95);
-		else if(action == 21) // LEFT
-			turnLeft(105);
-		else if(action == 22) // RIGHT
-			turnRight(105);
-		else if(action == 23) // LEFT
-			turnLeft(115);
-		else if(action == 24) // RIGHT
-			turnRight(115);
-		else if(action == 25) // LEFT
-			turnLeft(125);
-		else if(action == 26) // RIGHT
-			turnRight(125);
-		else if(action == 27) // LEFT
-			turnLeft(135);
-		else if(action == 28) // RIGHT
-			turnRight(135);
-		else if(action == 29) // LEFT
-			turnLeft(145);
-		else if(action == 30) // RIGHT
-			turnRight(145);
-		else if(action == 31) // LEFT
-			turnLeft(155);
-		else if(action == 32) // RIGHT
-			turnRight(155);
-		else if(action == 33) // LEFT
-			turnLeft(165);
-		else if(action == 34) // RIGHT
-			turnRight(165);
+			System.out.println("Moved Straight!!!!!!!!!!");
+		}
+		else if(action == 1){ // LEFT
+			do{
+				//turnLeft(5);
+				rotateLeft(5);
+				rotatedAngle += 5;
+				
+				if(rotatedAngle > 160){
+//					rotateRight(160);
+					reward = -100;
+					break;
+				}
+				
+//				System.out.println("Debugggggg Left");
+			}while(getColor(LIGHT_B) != BLACK);
+			System.out.println("RotatedAngle from LefT: " + rotatedAngle);
+		}
+		else if(action == 2){ // RIGHT
+			do{
+				//turnRight(5);
+				rotateRight(5);
+				rotatedAngle += 5;
+
+				if(rotatedAngle > 160){
+//					rotateLeft(160);
+					reward = -100;
+					break;
+				}
+				
+//				System.out.println("Debugggggg Right");
+			}while(getColor(LIGHT_B) != BLACK);
+			System.out.println("RotatedAngle from RIGHT: " + rotatedAngle);
+		}
+//		else if(action == 3) // LEFT
+//			turnLeft(15);
+//		else if(action == 4) // RIGHT
+//			turnRight(15);
+//		else if(action == 5) // LEFT
+//			turnLeft(25);
+//		else if(action == 6) // RIGHT
+//			turnRight(25);
+//		else if(action == 7) // LEFT
+//			turnLeft(35);
+//		else if(action == 8) // RIGHT
+//			turnRight(35);
+//		else if(action == 9) // LEFT
+//			turnLeft(45);
+//		else if(action == 10) // RIGHT
+//			turnRight(45);
+//		else if(action == 11) // LEFT
+//			turnLeft(55);
+//		else if(action == 12) // RIGHT
+//			turnRight(55);
+//		else if(action == 13) // LEFT
+//			turnLeft(65);
+//		else if(action == 14) // RIGHT
+//			turnRight(65);
+//		else if(action == 15) // LEFT
+//			turnLeft(75);
+//		else if(action == 16) // RIGHT
+//			turnRight(75);
+//		else if(action == 17) // LEFT
+//			turnLeft(85);
+//		else if(action == 18) // RIGHT
+//			turnRight(85);
+//		else if(action == 19) // LEFT
+//			turnLeft(95);
+//		else if(action == 20) // RIGHT
+//			turnRight(95);
+//		else if(action == 21) // LEFT
+//			turnLeft(105);
+//		else if(action == 22) // RIGHT
+//			turnRight(105);
+//		else if(action == 23) // LEFT
+//			turnLeft(115);
+//		else if(action == 24) // RIGHT
+//			turnRight(115);
+//		else if(action == 25) // LEFT
+//			turnLeft(125);
+//		else if(action == 26) // RIGHT
+//			turnRight(125);
+//		else if(action == 27) // LEFT
+//			turnLeft(135);
+//		else if(action == 28) // RIGHT
+//			turnRight(135);
+//		else if(action == 29) // LEFT
+//			turnLeft(145);
+//		else if(action == 30) // RIGHT
+//			turnRight(145);
+//		else if(action == 31) // LEFT
+//			turnLeft(155);
+//		else if(action == 32) // RIGHT
+//			turnRight(155);
+//		else if(action == 33) // LEFT
+//			turnLeft(165);
+//		else if(action == 34) // RIGHT
+//			turnRight(165);
 //		else if(action == 5) // STRAIGHT
 //			goStraight(5);
 		
@@ -224,7 +260,7 @@ public class MyRobot extends Robot
 			int state = getState();
 			
 			// デバッグ用
-			//System.out.println("A:" + getColor(LIGHT_A) + " B:" + getColor(LIGHT_B) + " C:" + getColor(LIGHT_C));
+			System.out.println("A:" + getColor(LIGHT_A) + " B:" + getColor(LIGHT_B) + " C:" + getColor(LIGHT_C));
 
 			// ランダムに行動を選択する確率
 			int action = ql.selectAction(state);
