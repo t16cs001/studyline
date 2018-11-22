@@ -119,9 +119,20 @@ public class QLearning {
   {
 	  System.out.println("Start of QTable:");
 	  for (int y=0; y < states; y++) {
+		  double maxQ = qTable[y][0];
+		  int nextAction = 0;
 		  for (int x=0; x < actions; x++) {
-			  System.out.print(qTable[y][x] + " ");
+			  if(qTable[y][x] > maxQ) {
+				  maxQ = qTable[y][x];
+				  nextAction = x;
+			  }
+			  /* QTable を全て表示する */
+			  //System.out.print(qTable[y][x] + " ");
 		  }
+		  
+		  System.out.println();
+		  /* 各状態で一番大きい Q値を持っている「行動」とその「Q値」を表示する */
+		  System.out.println("State" + y + " & Action" + nextAction + ": " + qTable[y][nextAction]);
 		  System.out.println();
 	  }
 	  System.out.println("End of QTable");

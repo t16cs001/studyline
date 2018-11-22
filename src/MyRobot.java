@@ -13,14 +13,14 @@ public class MyRobot extends Robot
 		// step 1:	Q学習する
 		// QLearningのインスタンスを作る	
 		int states = 8; // 状態数
-		int actions = 35;	// 行動数
+		int actions = 13;	// 行動数
 		double alpha = 0.5; // 学習率
 		double gamma = 0.5; // 割引率
 
 		QLearning ql = new QLearning(states, actions, alpha, gamma);
 
 		int trials = 500; //500 // 強化学習の試行回数 
-		int steps = 500; //100 // 1試行あたりの最大ステップ数
+		int steps = 300; //100 // 1試行あたりの最大ステップ数
 
 		// 試行回数だけ繰り返し
 		for(int t = 0; t < trials; t++){
@@ -28,7 +28,6 @@ public class MyRobot extends Robot
 
 			/* ロボットを初期位置に戻す */
 			init();
-			int error = 0;
 			
 			// ステップ数だけ繰り返し
 			for(int s = 0; s < steps; s++){
@@ -53,17 +52,17 @@ public class MyRobot extends Robot
 				// 状態afterにおける報酬
 				int reward = 0; // 頑張って取得する
 
-				// Goal に到達したら 100 報酬を与え、普通の通路なら -10
+				// Goal に到達したら 1000 報酬を与え、黒い線上にいるなら正の報酬を、白い線上にいるなら負の報酬を与える
 				if(isOnGoal())
 					reward = 1000;
-//				else if(after == 7)
-//					reward = 50;
-//				else if(after == 0)
-//					reward = -50;
+				else if(after == 7)
+					reward = 150;
+				else if(after == 0)
+					reward = -150;
 				else if(getColor(LIGHT_B) == BLACK)
 					reward = 50;
 				else if(getColor(LIGHT_B) == WHITE)
-					reward = -100;
+					reward = -50;
 
 				/*--------------- Q 値を更新 ---------------*/
 				// qlインスタンスから呼び出す
@@ -73,11 +72,6 @@ public class MyRobot extends Robot
 				// 速度調整＆画面描画
 				delay();
 				//*/
-//				if((state == after) && (after == 0))
-//					error++;
-//				
-//				if(error > 5)
-//					break;
 				
 				// ゴールに到達すれば終了
 				if (isOnGoal())
@@ -90,15 +84,22 @@ public class MyRobot extends Robot
 		init(); // ロボットを初期位置に戻す
 		finalRunTest(ql);
 
+		/* MyRobotForNXT に最適な行動番号を登録するために、学習後の Qテーブルを表示する */
+		//ql.showQTable(states);
+		
 		// Done
 		System.out.println("Done!!!!!!!!!!!!!!!!!");
 		//System.exit(0);
 	}
 	
+	/**
+	 * 状態を定義する関数
+	 */
 	public int getState(){
 		
 		int stateNum = 0;
 
+		// LIGHT_A : 右センサー ||| LIGHT_B : 真ん中センサー ||| LIGHT_C : 左センサー
 		if(getColor(LIGHT_A) == WHITE && getColor(LIGHT_B) == WHITE && getColor(LIGHT_C) == WHITE)
 			stateNum = 0;
 		else if(getColor(LIGHT_A) == WHITE && getColor(LIGHT_B) == WHITE && getColor(LIGHT_C) == BLACK)
@@ -124,86 +125,46 @@ public class MyRobot extends Robot
 	 */
 	public void moveRobotCar(int action)
 	{
-		// 0:LEFT 1:RIGHT
-		// 壁がないことを確認して移動する
+		/* 真っ直ぐ進む */
 		if(action == 0) // STRAIGHT
 			goStraight(1);
-		else if(action == 1) // LEFT
-			turnLeft(5);
-		else if(action == 2) // RIGHT
-			turnRight(5);
-		else if(action == 3) // LEFT
-			turnLeft(15);
-		else if(action == 4) // RIGHT
-			turnRight(15);
-		else if(action == 5) // LEFT
-			turnLeft(25);
-		else if(action == 6) // RIGHT
-			turnRight(25);
-		else if(action == 7) // LEFT
-			turnLeft(35);
-		else if(action == 8) // RIGHT
-			turnRight(35);
-		else if(action == 9) // LEFT
-			turnLeft(45);
-		else if(action == 10) // RIGHT
-			turnRight(45);
-		else if(action == 11) // LEFT
-			turnLeft(55);
-		else if(action == 12) // RIGHT
-			turnRight(55);
-		else if(action == 13) // LEFT
-			turnLeft(65);
-		else if(action == 14) // RIGHT
-			turnRight(65);
-		else if(action == 15) // LEFT
-			turnLeft(75);
-		else if(action == 16) // RIGHT
-			turnRight(75);
-		else if(action == 17) // LEFT
-			turnLeft(85);
-		else if(action == 18) // RIGHT
-			turnRight(85);
-		else if(action == 19) // LEFT
-			turnLeft(95);
-		else if(action == 20) // RIGHT
-			turnRight(95);
-		else if(action == 21) // LEFT
-			turnLeft(105);
-		else if(action == 22) // RIGHT
-			turnRight(105);
-		else if(action == 23) // LEFT
-			turnLeft(115);
-		else if(action == 24) // RIGHT
-			turnRight(115);
-		else if(action == 25) // LEFT
-			turnLeft(125);
-		else if(action == 26) // RIGHT
-			turnRight(125);
-		else if(action == 27) // LEFT
-			turnLeft(135);
-		else if(action == 28) // RIGHT
-			turnRight(135);
-		else if(action == 29) // LEFT
-			turnLeft(145);
-		else if(action == 30) // RIGHT
-			turnRight(145);
-		else if(action == 31) // LEFT
-			turnLeft(155);
-		else if(action == 32) // RIGHT
-			turnRight(155);
-		else if(action == 33) // LEFT
-			turnLeft(165);
-		else if(action == 34) // RIGHT
-			turnRight(165);
-//		else if(action == 5) // STRAIGHT
-//			goStraight(5);
 		
-		// ロボットの位置座標を更新
+		/* 角度によって、左に曲がる */
+		else if(action == 1) // LEFT
+			turnLeft(15);
+		else if(action == 3) // LEFT
+			turnLeft(30);
+		else if(action == 5) // LEFT
+			turnLeft(45);
+		else if(action == 7) // LEFT
+			turnLeft(60);
+		else if(action == 9) // LEFT
+			turnLeft(75);
+		else if(action == 11) // LEFT
+			turnLeft(90);
+		
+		/* 角度によって、右に曲がる */
+		else if(action == 2) // RIGHT
+			turnRight(15);
+		else if(action == 4) // RIGHT
+			turnRight(30);
+		else if(action == 6) // RIGHT
+			turnRight(45);
+		else if(action == 8) // RIGHT
+			turnRight(60);
+		else if(action == 10) // RIGHT
+			turnRight(75);
+		else if(action == 12) // RIGHT
+			turnRight(90);
+		
+		// 方向を曲げた後に、ロボットを前に進ませる
 		if(action != 0)
 			goStraight(1);
 	}
 	
+	/**
+	 * 各行動を実行するための条件を設定する関数
+	 */
 	public void turnLeft(int angle){
 		if(getColor(LIGHT_A) == WHITE || getColor(LIGHT_C) == BLACK)
 			rotateLeft(angle);
@@ -217,6 +178,9 @@ public class MyRobot extends Robot
 			forward(moveSpeed);
 	}
 	
+	/**
+	 * 学習終了で、最後の成果を出す用関数
+	 */
 	public void finalRunTest(QLearning ql) throws InterruptedException{
 
 		while(true){
@@ -226,7 +190,7 @@ public class MyRobot extends Robot
 			// デバッグ用
 			//System.out.println("A:" + getColor(LIGHT_A) + " B:" + getColor(LIGHT_B) + " C:" + getColor(LIGHT_C));
 
-			// ランダムに行動を選択する確率
+			// 次の行動を選択する
 			int action = ql.selectAction(state);
 
 			// 選択した行動を実行 (ロボットを移動する)
@@ -240,66 +204,5 @@ public class MyRobot extends Robot
 				break;
 		}
 		
-	}
-	
-	void trash(){
-
-		/*
-		// 右センサの色に応じて分岐
-		switch (getColor(LIGHT_A)) {
-
-		case BLACK:
-			// 黒を検知 => 右回転 => 前進
-			if(getColor(LIGHT_C) == WHITE)
-				rotateRight(35);
-			else
-				rotateRight(5);
-			break;
-
-		case WHITE:
-			// 白を検知 => 左回転 => 前進
-			rotateLeft(10);
-			break;
-
-		}
-
-		// 左センサの色に応じて分岐
-		switch (getColor(LIGHT_C)) {
-
-		case BLACK:
-			// 黒を検知 => 左回転 => 前進
-			if(getColor(LIGHT_A) == WHITE)
-				rotateLeft(35);
-			else
-				rotateLeft(5);
-			break;
-
-		case WHITE:
-			// 白を検知 => 右回転 => 前進
-			rotateRight(10);
-			break;
-
-		}
-		//*/
-		/*
-		if(getColor(LIGHT_B) == BLACK)
-			forward(1);
-
-		/*
-		// 中央センサの色に応じて分岐
-		switch (getColor(LIGHT_B)) {
-
-		case BLACK:
-			// 黒を検知 => 前進
-			forward(1);
-			break;
-
-		case WHITE:
-			// 白を検知 => 後退
-			//backward(1);
-			break;
-
-		}
-		//*/
 	}
 }
